@@ -53,11 +53,11 @@
                       :id="id"
                       v-model="componentProps[item.key]"
                     ></rich-text>
-                    <y-color-picker
+                    <el-color-picker
                       v-else-if="item.type=='color'"
                       v-model="componentProps[item.key]"
                       show-alpha
-                    ></y-color-picker>
+                    ></el-color-picker>
                     <!-- json -->
                     <attr-data
                       v-else-if="isCollapsed('attr') && item.type=='object'"

@@ -170,6 +170,9 @@ if (process.env.NODE_ENV === 'production') {
       index: './src/index.vue',
       editor: './editor/index.vue'
     },
+    externals: {
+      'vue': "Vue"
+    },
     output: {
       path: path.resolve(__dirname, './dist'),
       publicPath: `__OSS_BUCKET__${COMPONENT_PATH.replace('@', '/')}/`, // __OSS_BUCKET__占位符请勿修改，文件上传时会自动替换

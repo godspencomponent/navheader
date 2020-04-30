@@ -1,7 +1,7 @@
 {
   "name": "navheader",
   "label": "顶部导航",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "顶部导航",
   "type": 0,
   "tags": [20],
@@ -14,6 +14,8 @@
     "dist": "npm run build"
   },
   "style": {
+    "width": "100%",
+    "height": "64px"
   },
   "dependencies": {
     "element-ui": "2.4.6",

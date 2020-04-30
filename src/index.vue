@@ -1,15 +1,26 @@
 <template>
-  <div class="component navheader">
-    <Menu @action='pickItem' :menus="menus"/>
+  <div class="component navheader" :class="{'fixed': position === 'fixed'}" :style="{'background-color': backgroundColor}">
+    <div class="navheader-menu">
+      <a v-show="logo" :href="link" class="navheader-menu-logo"><img :src="logo" alt=""></a>
+      <div :style="{ 'text-align': align }" class="navheader-menu-navs">
+        <Menu
+          :background-color='backgroundColor'
+          :text-color='textColor'
+          :active-text-color='activeTextColor'
+          :default-active='defaultActive'
+          @action='pickItem' :menus="menus"/>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
   import {VueExtend} from 'godspen-lib'
+  import throttle from 'lodash/throttle'
   import Menu from './menu'
-  
-  let $correlationComs, rootEl
-
+  let $root
+  let $dock
+  let scrollfn
   export default {
     mixins: [VueExtend.mixin],
     name: 'navheader',
@@ -19,149 +30,174 @@
     stack: null,
     leaf: true,
     props: {
+      'menus': {
+        type: Array,
+        editor: {
+          ignore: true
+        },
+        default () {
+          return [
+            {
+              title: '导航 1',
+              href: 'https://baidu.com',
+              fn: '',
+              anchor: '',
+            }
+          ]
+        }
+      },
+      'background-color': {
+        type: String,
+        editor: {
+          label: '背景色',
+          type: 'color'
+        }
+      },
+      'text-color': {
+        type: String,
+        editor: {
+          label: '文字颜色',
+          type: 'color'
+        }
+      },
+      'active-text-color': {
+        type: String,
+        editor: {
+          label: '高亮文字颜色',
+          type: 'color'
+        }
+      },
+      'default-active': {
+        type: String,
+        editor: {
+          label: '默认导航项（可选）',
+          desc: '默认导航项的序号，"1" 或者 "1-1"（子菜单）',
+          type: 'input'
+        }
+      },
+      'logo': {
+        type: String,
+        editor: {
+          label: 'logo 图片（可选）',
+          type: 'image',
+        }
+      },
+      link: {
+        type: String,
+        editor: {
+          label: 'logo 超链接（可选）',
+          type: 'input',
+        }
+      },
+      'align': {
+        type: String,
+        editor: {
+          label: '对齐方式',
+          type: 'enum',
+          defaultList: {
+            'left': '居左',
+            'right': '居右'
+          },
+          default: 'left'
+        }
+      },
+      sticky: {
+        type: Boolean,
+        editor: {
+          type: 'boolean',
+          label: '滚动置顶'
+        },
+        default: false
+      },
+      rootId: {
+        type: String,
+        editor: {
+          type: 'input',
+          label: '滚动区组件 id （选填）'
+        }
+      }
     },
     computed: {
     },
     data () {
       return {
-        menus: [
-          {
-            title: '处理中心',
-            href: '',
-            fn: '',
-            anchor: '',
-          },
-          {
-            title: '哈啊安抚',
-            href: '',
-            fn: '',
-            anchor: '',
-            sub: [
-              {
-                title: '三国杀',
-                href: '',
-                fn: '',
-                anchor: '',
-              },
-              {
-                title: '设计公司',
-                href: '',
-                fn: '',
-                anchor: '',
-              }
-            ]
-          },
-          {
-            title: '附加费',
-            href: '',
-            fn: '',
-            anchor: '',
-            sub: [
-              {
-                title: '刚看过',
-                href: '',
-                fn: '',
-                anchor: '',
-              },
-              {
-                title: '还好啦',
-                href: '',
-                fn: '',
-                anchor: '',
-                sub: [
-                  {
-                    title: '如无问题',
-                    href: '',
-                    fn: '',
-                    anchor: '',
-                  },
-                  {
-                    title: '来咯',
-                    href: '',
-                    fn: '',
-                    anchor: '',
-                  }
-                ]
-              }
-            ]
-          },
-        ]
+        position: 'relative',
+        deltaY: 64
       }
+    },
+    watch: {
+      sticky (val) {
+        if (val) this.listenScroll()
+        else this.removeScroll()
+      }
+    },
+    mounted () {
+      scrollfn = throttle(this.onScroll, 60)
+      this.$nextTick(() => {
+        $root = this.getRootEl()
+        $dock = this.getDock()
+        if (this.sticky) this.listenScroll()
+      })
     },
     editorMethods: {
     },
     methods: {
-      async pickItem (nav, index) {
-        if (nav.activeAction) this.oncallExecute(nav.activeAction, [nav, index])
-        if (nav.href) {
+      pickItem (nav, index) {
+        if (nav.fn) this.oncallExecute(nav.fn, [nav, index])
+        if (/^https?:\/\//.test(nav.href)) {
           this.redirect(nav.href)
-        } else if (nav.correlationId) {
-          await this.anchorTo(nav.correlationId, this.scrollSpeed || 'xx')
+        } else if (nav.anchor) {
+          this.anchorTo(nav.anchor)
         }
-        this.currentIndex = index
       },
-      async anchorTo (id, speed) {
-        switch (String(speed)) {
-          case 'fast':
-            speed = 60
-            break
-          case 'normal':
-            speed = 32
-            break
-          case 'slow':
-            speed = 18
-            break
-          case 'none':
-          default:
-            speed = 0
-        }
+      listenScroll () {
+        if (!$root) return
+        const $scroll = /^html$/i.test($root.nodeName) ? document : $root
+        $scroll.addEventListener('scroll', scrollfn)
+      },
+      removeScroll () {
+        this.position = 'relative'
+        if (!$root) return
+        const $scroll = /^html$/i.test($root.nodeName) ? document : $root
+        $scroll.removeEventListener('scroll', scrollfn)
+      },
+      getRootEl () {
+        const development = process.env.NODE_ENV === 'development'
+        const el = (() => {
+          if (development) return document.documentElement
+          else {
+            return (development && this.rootId && this.$parent.getComponent(this.rootId) || {}).$el || document.documentElement
+          }
+        })()
+        return el
+      },
+      getDock () {
+        return this.$el.parentNode
+      },
+      anchorTo (id) {
         if (!id) return
-        var $com = this.$parent.getComponent(id)
-        if (!$com) return
-        var $el = $com.$el
-        if (!$el) return
-        var rect = $el.getBoundingClientRect()
-        var container = rootEl
-        if (!container) return
-        var containerRect = container.getBoundingClientRect()
+        const $com = (this.$parent.getComponent(id) || {}).$el
+        if (!$com || !$root) return
+        var rect = $com.getBoundingClientRect()
+        var containerRect = $root.getBoundingClientRect()
         var target = rect.top - (containerRect.top + (+this.deltaY || 0))
-        var direction = target > 0 ? 1 : -1
-        var delta = speed <= 0 ? Math.abs(target) : speed
-        var move = new Promise(resolve => {
-          var timer = setInterval(() => {
-            if (target * direction <= 0) {
-              clearInterval(timer)
-              resolve()
-            }
-            var mdelta = Math.min(Math.abs(target), delta)
-            container.scrollTop += direction * mdelta
-            target -= mdelta * direction
-          }, 16)
-        })
-        await move
+        $root.scrollTop = target
       },
       redirect (url) {
         setTimeout(() => {
           window.location.href = url
-        }, 20)
+        }, 100)
       },
       onScroll () {
-        $correlationComs = this.navbars.map((nav, index) => [nav.correlationId && this.$parent.getComponent(nav.correlationId), index])
-        var tops = $correlationComs
-        .map(([nav, index]) => {
-          return [nav && nav.$el.getBoundingClientRect().top, nav && nav.$el.getBoundingClientRect().bottom, index]
-        })
-        .filter(a => typeof a[0] === 'number')
-        .sort((a, b) => a[0] > b[0] ? 1 : -1)
-        var containerRect = rootEl.getBoundingClientRect()
-        for (let [top, bottom, index] of tops) {
-          if (containerRect.top + (+this.deltaY || 0) <= top ||
-            (containerRect.top + (+this.deltaY || 0) >= top && bottom > containerRect.bottom)) {
-            this.currentIndex = index
-            break
-          }
+        if (!$dock || !$root) return
+        const top = /^html$/i.test($root.nodeName) ? 0 : $root.getBoundingClientRect().top
+        const dockTop = $dock.getBoundingClientRect().top
+        console.log('onScroll', top, dockTop)
+        if (dockTop <= top) {
+          this.position = 'fixed'
+        } else {
+          this.position = 'relative'
         }
-        console.log(rootEl.scrollTop, this.currentIndex)
       }
     }
   }
@@ -170,7 +206,38 @@
 <style lang="stylus" rel="stylesheet/stylus" type="text/stylus" scoped>
   .component.navheader {
     width: 100%;
-    height: 100%;
-
+    height: auto;
+    background-color: #fff;
+    border-bottom: solid 1px #e6e6e6;
+    &.fixed {
+      position: fixed;
+      left 0;
+      right 0;
+      top 0;
+      z-index 10
+    }
+    .navheader-menu {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: flex;
+      &-logo {
+        display inline-block
+        height 60px;
+        flex: 0
+        cursor pointer
+        position relative
+        margin-right: 30px;
+        > img {
+          height: 48px;
+          width: auto;
+          margin-top: 6px;
+          vertical-align: top;
+        }
+      }
+      &-navs {
+        flex: 1;
+        text-align left
+      }
+    }
   }
 </style>

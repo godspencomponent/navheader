@@ -26,7 +26,8 @@
         :h="componentSize.height"
       >
         <div class="sizeTip">组件显示区域({{componentSize.width}}*{{componentSize.height}})</div>
-        <com v-bind="componentProps" ref="component"></com>
+        <div style="height: 64px;"><com v-bind="componentProps" ref="component"></com></div>
+        <one ref="ones" v-for="index in 4" :text='index' :key="index">sjgsgsg</one>
       </vue-drag-resize>
       <div class="block editor" :style="editerStyle">
         <div class="title" @click="editerActive=true" @mousedown="mousedown" @mouseup="mouseup">编辑面板</div>
@@ -44,9 +45,9 @@
 
 <script>
   import com from '../src/index'
+  import one from '../src/example'
   import Attribute from './components/Attribute'
   import Loading from './components/Loading'
-  import example from '../src/example'
   import Editor from '../editor/index'
   import ImgViewer from './components/ImgViewer'
   import Toast from './components/Toast'
@@ -54,7 +55,7 @@
   import 'mint-ui/message-box/style.css'
 
   export default {
-    components: {Toast, Loading, ImgViewer, example, com, Editor, Attribute},
+    components: {Toast, Loading, ImgViewer, com, one, Editor, Attribute},
     name: 'p',
     created () {
       // 这里注册了一些全局方法，和渲染器里面的统一的。
@@ -141,7 +142,7 @@
           },
           'Desktop': {
             name: 'Desktop',
-            width: 1140,
+            width: 1340,
             height: 720
           }
         },
@@ -162,27 +163,81 @@
 
         // 组件开发的时候，配置传入的默认参数，按需修改，这里面的字段一般需要和  src/index.vue 里面的props的key保持一致
         componentProps: {
-          reanderType: 'canvas',
-          packageType: 'common',
-          datasourcekey: '',
-          option: {
-            title: {
-              text: 'ECharts 入门示例'
+          textColor: '',
+          activeTextColor: '',
+          backgroundColor: '',
+          defaultActive: '1',
+          align: 'left',
+          logo: 'https://ymm-maliang.oss-cn-hangzhou.aliyuncs.com/ymm-maliang/access/ymm_1536306621811.png',
+          link: 'https://baidu.com',
+          menus: [
+            {
+              title: '处理中心',
+              href: 'http://baidu.com',
+              fn: '',
+              anchor: '',
             },
-            tooltip: {},
-            legend: {
-              data: ['销量']
+            {
+              title: '哈啊安抚',
+              href: 'http://baidu2.com',
+              fn: '',
+              anchor: '',
+              sub: [
+                {
+                  title: '三国杀',
+                  href: 'http://baidu2.com',
+                  fn: '',
+                  anchor: '',
+                },
+                {
+                  title: '设计公司',
+                  href: '',
+                  fn: '',
+                  anchor: '5',
+                }
+              ]
             },
-            xAxis: {
-              data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+            {
+              title: '附加费',
+              href: '',
+              fn: '',
+              anchor: '',
+              sub: [
+                {
+                  title: '刚看过',
+                  href: '',
+                  fn: '',
+                  anchor: '',
+                },
+                {
+                  title: '还好啦',
+                  href: '',
+                  fn: '',
+                  anchor: '',
+                  sub: [
+                    {
+                      title: '如无问题如无问题如无问题',
+                      href: '',
+                      fn: '',
+                      anchor: '',
+                    },
+                    {
+                      title: '来咯',
+                      href: '',
+                      fn: '',
+                      anchor: '',
+                    }
+                  ]
+                }
+              ]
             },
-            yAxis: {},
-            series: [{
-              name: '销量',
-              type: 'bar',
-              data: [5, 20, 36, 10, 10, 20]
-            }]
-          }
+            {
+              title: '处理中心',
+              href: '',
+              fn: '',
+              anchor: '',
+            },
+          ]
         },
       }
     },
