@@ -64,7 +64,7 @@
         {
           title: '导航 1',
           href: 'https://baidu.com',
-          fn: '',
+          fn: [],
           anchor: '',
         }
       ])
@@ -93,7 +93,7 @@
         return {
           title: '导航 1',
           href: 'https://baidu.com',
-          fn: '',
+          fn: [],
           anchor: '',
         }
       },

@@ -167,32 +167,32 @@
           activeTextColor: '',
           backgroundColor: '',
           defaultActive: '1',
-          align: 'left',
+          align: 'right',
           logo: 'https://ymm-maliang.oss-cn-hangzhou.aliyuncs.com/ymm-maliang/access/ymm_1536306621811.png',
           link: 'https://baidu.com',
           menus: [
             {
               title: '处理中心',
               href: 'http://baidu.com',
-              fn: '',
+              fn: [],
               anchor: '',
             },
             {
               title: '哈啊安抚',
               href: 'http://baidu2.com',
-              fn: '',
+              fn: [],
               anchor: '',
               sub: [
                 {
                   title: '三国杀',
                   href: 'http://baidu2.com',
-                  fn: '',
+                  fn: [],
                   anchor: '',
                 },
                 {
                   title: '设计公司',
                   href: '',
-                  fn: '',
+                  fn: [],
                   anchor: '5',
                 }
               ]
@@ -200,31 +200,31 @@
             {
               title: '附加费',
               href: '',
-              fn: '',
+              fn: [],
               anchor: '',
               sub: [
                 {
                   title: '刚看过',
                   href: '',
-                  fn: '',
+                  fn: [],
                   anchor: '',
                 },
                 {
                   title: '还好啦',
                   href: '',
-                  fn: '',
+                  fn: [],
                   anchor: '',
                   sub: [
                     {
                       title: '如无问题如无问题如无问题',
                       href: '',
-                      fn: '',
+                      fn: [],
                       anchor: '',
                     },
                     {
                       title: '来咯',
                       href: '',
-                      fn: '',
+                      fn: [],
                       anchor: '',
                     }
                   ]
@@ -234,7 +234,7 @@
             {
               title: '处理中心',
               href: '',
-              fn: '',
+              fn: [],
               anchor: '',
             },
           ]

@@ -1,6 +1,6 @@
 <template>
   <div class="component navheader" :class="{'fixed': position === 'fixed'}" :style="{'background-color': backgroundColor}">
-    <div class="navheader-menu">
+    <div class="navheader-menu" :style="{ 'max-width': maxWidth }">
       <a v-show="logo" :href="link" class="navheader-menu-logo"><img :src="logo" alt=""></a>
       <div :style="{ 'text-align': align }" class="navheader-menu-navs">
         <Menu
@@ -8,6 +8,7 @@
           :text-color='textColor'
           :active-text-color='activeTextColor'
           :default-active='defaultActive'
+          :align="align"
           @action='pickItem' :menus="menus"/>
       </div>
     </div>
@@ -18,6 +19,12 @@
   import {VueExtend} from 'godspen-lib'
   import throttle from 'lodash/throttle'
   import Menu from './menu'
+
+  const parseSize = (str = '') => {
+    str = String(str).trim()
+    return /^[\d.]+(px)?$/.test(str) ? str.replace('px', '') + 'px' : /^[\d.]+%$/.test(str) ? str : ''
+  }
+
   let $root
   let $dock
   let scrollfn
@@ -40,7 +47,7 @@
             {
               title: '导航 1',
               href: 'https://baidu.com',
-              fn: '',
+              fn: [],
               anchor: '',
             }
           ]
@@ -51,21 +58,24 @@
         editor: {
           label: '背景色',
           type: 'color'
-        }
+        },
+        default: '#ffffff',
       },
       'text-color': {
         type: String,
         editor: {
           label: '文字颜色',
           type: 'color'
-        }
+        },
+        default: '#909399',
       },
       'active-text-color': {
         type: String,
         editor: {
           label: '高亮文字颜色',
           type: 'color'
-        }
+        },
+        default: '#303133',
       },
       'default-active': {
         type: String,
@@ -115,14 +125,27 @@
           type: 'input',
           label: '滚动区组件 id （选填）'
         }
+      },
+      iWidth: {
+        type: [String, Number],
+        editor: {
+          type: 'input',
+          label: '导航内容区宽度（选填）',
+          desc: '可以输入数字（像素），也可以是百分数，(默认 1140 像素)'
+        }
       }
     },
     computed: {
+      maxWidth () {
+        return parseSize(this.iWidth) || parseSize(this.width)
+      }
     },
     data () {
       return {
         position: 'relative',
-        deltaY: 64
+        deltaY: 64,
+        inEditor: /^edit[oe]r$/i.test(window.EDIT_TYPE),
+        width: 1140
       }
     },
     watch: {
@@ -184,9 +207,24 @@
         $root.scrollTop = target
       },
       redirect (url) {
-        setTimeout(() => {
-          window.location.href = url
-        }, 100)
+        const a = document.createElement('a')
+        a.href = url
+        const innerAppPath = (() => {
+          let base = window.app && window.app.$router.options.base || '-1'
+          let sameBase = a.pathname.indexOf(base) === 0
+          let sameOrigin = a.origin.replace(/^https?/, 'http') === window.location.origin.replace(/^https?/, 'http')
+          return sameOrigin && sameBase && a.href.replace(a.origin, '').replace(base, '')
+        })()
+        const newPage = a.search.includes('target=_blank')
+        if (newPage) {
+          a.target = '_blank'
+          a.click()
+        } else {
+          setTimeout(() => {
+            if (innerAppPath) window.app.$router.push(innerAppPath)
+            else a.click()
+          }, 100)
+        }
       },
       onScroll () {
         if (!$dock || !$root) return
@@ -203,12 +241,17 @@
   }
 </script>
 
+<style lang="stylus" rel="stylesheet/stylus" type="text/stylus">
+body > .el-menu--horizontal, body > .el-menu--horizontal .el-menu--popup .el-menu--horizontal {
+  border-bottom: none
+}
+</style>
 <style lang="stylus" rel="stylesheet/stylus" type="text/stylus" scoped>
   .component.navheader {
     width: 100%;
     height: auto;
     background-color: #fff;
-    border-bottom: solid 1px #e6e6e6;
+    box-shadow 0 5px 10px -5px #bbbbbb
     &.fixed {
       position: fixed;
       left 0;
